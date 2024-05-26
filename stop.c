@@ -5,9 +5,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define DEBUG
+
+#ifdef DEBUG
+#define DPRINT(fmt, ...) printf("[DEBUG] " fmt, ##__VA_ARGS__)
+#else
+#define DPRINT(fmt, ...)
+#endif
+
 int main(int argc, const char **argv) {
     if(argc < 2) {
-        printf("Usage: stop [COMMAND]\n");
+        DPRINT("Usage: stop [COMMAND]\n");
         return 1;
     }
     const char *proc_name = argv[1];
@@ -18,20 +26,20 @@ int main(int argc, const char **argv) {
     }
     subproc_argv[argc-1] = NULL;
     
-    printf("Will Run Command: \"%s", proc_name);
+    DPRINT("Will Run Command: \"%s", proc_name);
     for(int i = 1; i < argc-1; i++) {
-        printf(" %s", subproc_argv[i]);
+        DPRINT(" %s", subproc_argv[i]);
     }
-    printf("\" on SIGCONT...\n");
+    DPRINT("\" on SIGCONT...\n");
 
-    printf("Stopping...\n");
+    DPRINT("Stopping...\n");
 
     if(kill(getpid(), SIGSTOP)) {
         perror("kill");
         return 1;
     }
 
-    printf("Resumed!\n");
+    DPRINT("Resumed!\n");
 
     if(execvp(subproc_argv[0], subproc_argv)) {
         perror("execvp");

@@ -2,11 +2,14 @@
 
 URL_LIST=$1
 
-BROWSER=curl
+BROWSER=ping
 STOP=./stop
-NETDEV=eth0
+NETDEV=wlp1s0
 
-DELAY=3s
+LOSS_PERCENT=50%
+DELAY_TIME=100ms
+
+SLEEP_TIME=10s
 
 TO_KILL=
 
@@ -39,13 +42,13 @@ do
     strace -p $PID |& grep "SOCK_" &
     TO_KILL="$1 $TO_KILL"
 
-    tc qdisc add dev $NETDEV root netem loss 0.1%
+    tc qdisc add dev $NETDEV root netem loss $LOSS_PERCENT delay $DELAY_TIME
 
     # Restart the process
     kill -18 $PID
 
     # Give the browser some time to connect
-    sleep $DELAY
+    sleep $SLEEP_TIME
 
     # Kill all outstanding processes
     echo Killing all outstanding processes...

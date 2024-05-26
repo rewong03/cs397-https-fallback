@@ -1,9 +1,10 @@
 
-WEBSITE_LIST := simple_list.txt
+BFALL := ./bfall.py
+NETDEV := wlp1s0
+WEBSITE_LIST := small_websites.txt
+BROWSER_LIST := browser_cmds.txt
+OUTPUT_CSV := data.csv
 
-run: stop
-	./loss.sh $(WEBSITE_LIST)
-
-stop: stop.c
-	$(CC) $< -o $@
+basic_test:
+	$(BFALL) $(NETDEV) $(WEBSITE_LIST) $(BROWSER_LIST) $(OUTPUT_CSV)
 
