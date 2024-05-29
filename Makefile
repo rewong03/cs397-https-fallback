@@ -1,5 +1,5 @@
 
-BFALL := ./bfall.py
+BFALL := ./bfall/bfall.py
 NETDEV := wlp1s0
 WEBSITE_LIST := small_websites.txt
 BROWSER_LIST := browser_cmds.txt
