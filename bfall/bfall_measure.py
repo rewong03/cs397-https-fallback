@@ -105,7 +105,7 @@ def run_test(browser_cmd, website, netdev):
     stderr_path = OUTPUT_DIR + "/" + str(id) + ".stderr"
 
     stdout_file = open(stdout_path, 'w+')
-    stderr_file = open(stdout_path, 'w+')
+    stderr_file = open(stderr_path, 'w+')
 
     tshark_cmd = ["tshark", "-w", tshark_output_file]
 
