@@ -10,8 +10,8 @@ def kill_all():
 
 atexit.register(kill_all)
 
-def run_proc(cmd, add_to_outstanding=True):
-    proc = subproc.Popen(cmd, stdout=subproc.PIPE, stderr=subproc.PIPE, stdin=subproc.PIPE, process_group=0)
+def run_proc(cmd, add_to_outstanding=True, stdout=subproc.PIPE, stderr=subproc.PIPE):
+    proc = subproc.Popen(cmd, process_group=0, stdout=stdout, stderr=stderr)
     if add_to_outstanding:
         CHILD_PROCESSES.add(proc)
     return proc

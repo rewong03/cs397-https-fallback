@@ -1,0 +1,3 @@
+website,browser,browser_cmd,delay_ms,loss_percent,timed_out,date,time,uuid,strace_path,tshark_path,stdout_path,stderr_path
+https://www.youtube.com,curl,curl --http3 $URL,0,0,False,05/29/2024,15:03:36,ba7e392b-139a-4561-8def-351ddefbf0ab,./data/ba7e392b-139a-4561-8def-351ddefbf0ab.strace,./data/ba7e392b-139a-4561-8def-351ddefbf0ab.pcap,./data/ba7e392b-139a-4561-8def-351ddefbf0ab.stdout,./data/ba7e392b-139a-4561-8def-351ddefbf0ab.stderr
+https://www.facebook.com,curl,curl --http3 $URL,0,0,False,05/29/2024,15:03:37,ea50c251-ef4b-44cb-b657-69d69ec5a3d8,./data/ea50c251-ef4b-44cb-b657-69d69ec5a3d8.strace,./data/ea50c251-ef4b-44cb-b657-69d69ec5a3d8.pcap,./data/ea50c251-ef4b-44cb-b657-69d69ec5a3d8.stdout,./data/ea50c251-ef4b-44cb-b657-69d69ec5a3d8.stderr

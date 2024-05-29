@@ -1,2 +1,2 @@
+firefox -headless --screenshot $URL
 curl --http3 $URL
-firefox --headless $URL

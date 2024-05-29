@@ -14,14 +14,16 @@ import rich
 import parse
 import itertools
 from ast import literal_eval
+import uuid
 
 from throttle import NetDev
 from proc import *
 from trace import *
-from analysis import *
 
 VERBOSE=False
 MAX_RUNTIME=15
+
+OUTPUT_DIR="./"
 
 CHARS_PER_BYTE=4
 MAX_STRACE_STR_LEN=(2**16)*CHARS_PER_BYTE
@@ -91,72 +93,81 @@ def handle_strace_output(data, output):
 
 def run_test(browser_cmd, website, netdev):
 
-    strace_output_file = "strace.tmp"
+    global OUTPUT_DIR
 
-    piped_in = '""'
-    
-    cmd = ["strace", "-f", "-o", strace_output_file, "-e", "trace=network", "-v", "-s", str(MAX_STRACE_STR_LEN), "-x"]
-    s = browser_cmd.replace('$URL',website).split("<")
-    if len(s) > 1:
-        piped_in = s[1].strip()
-    cmd.extend(re.split(r'\s+', s[0]))
-    piped_in = literal_eval(piped_in)
+    original_browser_cmd = browser_cmd
+
+    id = uuid.uuid4() 
+    tshark_output_file = OUTPUT_DIR + "/" + str(id) + ".pcap"
+    strace_output_file = OUTPUT_DIR + "/" + str(id) + ".strace"
+
+    stdout_path = OUTPUT_DIR + "/" + str(id) + ".stdout"
+    stderr_path = OUTPUT_DIR + "/" + str(id) + ".stderr"
+
+    stdout_file = open(stdout_path, 'w+')
+    stderr_file = open(stdout_path, 'w+')
+
+    tshark_cmd = ["tshark", "-w", tshark_output_file]
+
+    strace_cmd = ["strace", "-f", "-o", strace_output_file, "-e", "trace=network", "-v", "-s", str(MAX_STRACE_STR_LEN), "-xx", "-tt"]
+    browser_cmd = browser_cmd.replace('$URL',website)
+    browser_cmd = re.split(r'\s+',browser_cmd)
+    strace_cmd.extend(browser_cmd)
 
     now = datetime.now()
-    proc = run_proc(cmd)
-    proc.stdin.write(piped_in.encode())
+    tshark_proc = run_proc(tshark_cmd)
+    strace_proc = run_proc(strace_cmd, stdout=stdout_file, stderr=stderr_file)
 
     timed_out = False
-    stdout = b""
-    stderr = b""
     try:
-        stdout, stderr = proc.communicate(timeout=MAX_RUNTIME)
+        strace_proc.communicate(timeout=MAX_RUNTIME)
     except subproc.TimeoutExpired:
         #print("Killing Process: {}".format(proc.pid))
-        kill_proc(proc)
+        kill_proc(strace_proc)
         #print("Communicating with Process: {}".format(proc.pid))
-        stdout, stderr = proc.communicate()
+        strace_proc.communicate()
         timed_out = True
 
-    stdout = stdout.decode()
-    stderr = stderr.decode()
-    strace = ""
-    with open(strace_output_file, 'r') as file:
-        strace = file.read()
+    kill_proc(tshark_proc)
 
     run_data = {}
     run_data['website'] = website
-    run_data['browser'] = browser_cmd
+    run_data['browser'] = browser_cmd[0]
+    run_data['browser_cmd'] = original_browser_cmd
     run_data['delay_ms'] = netdev.delay_ms
     run_data['loss_percent'] = netdev.loss_percent
     run_data['timed_out'] = timed_out
     run_data['date'] = now.strftime("%m/%d/%Y")
     run_data['time'] = now.strftime("%H:%M:%S")
-    #run_data['stderr'] = repr(stderr)
+    run_data['uuid'] = str(id)
+    run_data['strace_path'] = strace_output_file
+    run_data['tshark_path'] = tshark_output_file
+    run_data['stdout_path'] = stdout_path
+    run_data['stderr_path'] = stderr_path
 
-    traced_processes = handle_strace_output(run_data, strace)
-    run_data['num_proc'] = len(traced_processes.keys())
-
-    analyze_traced_processes(run_data, traced_processes)
-
-    os.remove(strace_output_file)
+    stdout_file.close()
+    stderr_file.close()
 
     return run_data
 
 def main():
     parser = argparse.ArgumentParser(
-            prog="bfall",
-            description='Tests a Browser\'s HTTP/3 Fallback Mechanism'
+            prog="bfall_measure",
+            description='Runs Measurements on Browser(s) HTTP/3 Fallback Mechanism'
             )
     parser.add_argument('netdev')
     parser.add_argument('website_list')
     parser.add_argument('browser_command_list')
     parser.add_argument('output_csv')
+    parser.add_argument('output_dir')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
     global VERBOSE
     VERBOSE=args.verbose
+
+    global OUTPUT_DIR
+    OUTPUT_DIR=args.output_dir
 
     website_list = []
     with open(args.website_list) as website_file:
