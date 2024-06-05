@@ -16,6 +16,9 @@ def run_proc(cmd, add_to_outstanding=True, stdout=subproc.PIPE, stderr=subproc.P
         CHILD_PROCESSES.add(proc)
     return proc
 
+def term_proc(proc, remove=True):
+    proc.kill()
+
 def kill_proc(proc, remove=True):
     run_proc(["kill", "-9", str(-proc.pid)], False).wait()
     if remove and proc in CHILD_PROCESSES:

@@ -1,2 +1,1 @@
-firefox -headless --screenshot $URL
-curl --http3 $URL
+google-chrome-stable -headless -screenshot --incognito $URL

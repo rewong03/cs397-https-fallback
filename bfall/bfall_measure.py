@@ -107,7 +107,7 @@ def run_test(browser_cmd, website, netdev):
     stdout_file = open(stdout_path, 'w+')
     stderr_file = open(stderr_path, 'w+')
 
-    tshark_cmd = ["tshark", "-w", tshark_output_file]
+    tshark_cmd = ["tshark", "-w", tshark_output_file, "-i", netdev.name]
 
     strace_cmd = ["strace", "-f", "-o", strace_output_file, "-e", "trace=network", "-v", "-s", str(MAX_STRACE_STR_LEN), "-xx", "-tt"]
     browser_cmd = browser_cmd.replace('$URL',website)
@@ -128,7 +128,7 @@ def run_test(browser_cmd, website, netdev):
         strace_proc.communicate()
         timed_out = True
 
-    kill_proc(tshark_proc)
+    term_proc(tshark_proc)
 
     run_data = {}
     run_data['website'] = website
@@ -179,8 +179,8 @@ def main():
 
     netdev = NetDev(args.netdev)
 
-    delay_list = [0,5,50,200]
-    loss_list = [0,5,15,50,90]
+    delay_list = [0]
+    loss_list = [0,5,10,15,20,30,40,50,60,70,80]
 
     netdev.set_delay(100)
     netdev.set_loss(10)

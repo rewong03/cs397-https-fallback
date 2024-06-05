@@ -1,5 +1,8 @@
 
-data
-data.csv
+data*
+*data
+*.csv
+*.png
+
 __pycache__
 

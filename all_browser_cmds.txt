@@ -1,0 +1,3 @@
+opera -headless -screenshot --incognito $URL
+google-chrome-stable -headless -screenshot --incognito $URL
+firefox -headless --screenshot -private $URL
